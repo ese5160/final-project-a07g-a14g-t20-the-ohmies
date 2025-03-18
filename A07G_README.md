@@ -1,7 +1,33 @@
 # a07g-exploring-the-CLI
 
-* Team Number:
-* Team Name:
-* Team Members:
-* GitHub Repository URL:
+* Team Number: T20 
+* Team Name: The Ohmies
+* Team Members: Megha Mistry & Kevin Wang
+* GitHub Repository URL: https://github.com/ese5160/final-project-a07g-a14g-t20-the-ohmies.git
 * Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
+
+## 1. Software Architecture
+
+## 2. Understanding the Starter code
+
+    1. "InitializeSerialConsole()" configures and enables UART communication, sets up circular buffers, and registers callbacks for asynchronous reads/writes. "cbufRx" and "cbufTx" are handle pointers to circular buffer structures (type "cbuf_handle_t"), which are used to manage incoming and outgoing character data in a first-in-first-out manner.
+
+    2. "cbufRx" and "cbufTx" are initialized using "circular_buf_init()" function, which allocates memory for the circular buffer structure and sets up the buffer with the provided array and size. The circular buffer implementation is defined in "circular_buffer.c", which contains all the functions for buffer operations including initialization, reading, writing, and status checking.
+
+    3. The character arrays storing RX and TX characters are "rxCharacterBuffer" and "txCharacterBuffer", both defined in "SerialConsole.c" with sizes of "RX_BUFFER_SIZE" (512 bytes) and "TX_BUFFER_SIZE" (512 bytes) respectively. These arrays are passed to the circular buffer initialization function and serve as the actual storage for the character data being received and transmitted.
+    
+    4. The UART interrupts for both character reception and transmission are handled by the ASF USART driver. In particular, they are defined and implemented in the files "usart_interrupt.h" and "usart_interrupt.c", where the interrupt service routine "_usart_interrupt_handler()" is set up to handle events such as the Data Register Empty (DRE) interrupt for transmitting and the Receive Complete (RXC) interrupt for receiving.
+
+    5. For a character received (RX), the callback function is "usart_read_callback()". For a character sent (TX), the callback function is "usart_write_callback()" as defined in "SerialConsole.c".
+
+    6. In "usart_read_callback()", the function is intended to handle the new character coming from the SERCOM interface; the character (held in "latestRx") should be placed into the receive circular buffer ("cbufRx"), and a new read job is initiated to continue capturing characters. In "usart_write_callback()", the callback checks whether there are additional characters waiting in the transmit circular buffer ("cbufTx"), and if so, it retrieves the next character and starts a transmission job (via "usart_write_buffer_job()"); this ensures a continuous flow of data being sent from the circular buffer to the UART hardware.
+
+    7.
+
+    8.
+
+    9.  In "main.c", the "StartTasks()" function prints the amount of free heap memory before task creation, then creates the CLI task using "xTaskCreate()" (which starts the "vCommandConsoleTask" thread), and finally prints the free heap memory after the CLI task is started. Only one application-specific thread (the CLI thread) is started by "StartTasks()", aside from the inherent system tasks scheduled by FreeRTOS (such as the idle and timer tasks).
+
+## 3. Debug Logger Module
+
+## 4. Wiretap the convo
