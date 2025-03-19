@@ -48,6 +48,8 @@ static void FreeRTOS_read(char *character);
  * CLI Thread
  ******************************************************************************/
 
+
+SemaphoreHandle_t xRxSemaphore = NULL;
 void vCommandConsoleTask(void *pvParameters)
 {
     // REGISTER COMMANDS HERE
@@ -64,7 +66,12 @@ void vCommandConsoleTask(void *pvParameters)
     static char pcEscapeCodes[4];
     static uint8_t pcEscapeCodePos = 0;
 
-    // Any semaphores/mutexes/etc you needed to be initialized, you can do them here
+    // Create semaphore for character reception synchronization
+    xRxSemaphore = xSemaphoreCreateBinary();
+    if (xRxSemaphore == NULL) {
+        SerialConsoleWriteString("Failed to create semaphore\r\n");
+        vTaskDelete(NULL);
+    }
 
     /* This code assumes the peripheral being used as the console has already
     been opened and configured, and is passed into the task as the task
@@ -206,18 +213,24 @@ void vCommandConsoleTask(void *pvParameters)
         }
     }
 }
-
 /**************************************************************************/ /**
- * @fn			void FreeRTOS_read(char* character)
- * @brief		STUDENTS TO COMPLETE. This function block the thread unless we received a character. How can we do this?
-                 There are multiple solutions! Check all the inter-thread communications available! See https://www.freertos.org/a00113.html
- * @details		STUDENTS TO COMPLETE.
- * @note
+ * @fn         void FreeRTOS_read(char* character)
+ * @brief      Blocks the thread until a character is received from the UART
+ * @details    Uses a semaphore to synchronize between the UART callback and this thread.
+ *             When a character is available in the buffer, this function retrieves it.
+ * @param[out] character Pointer to store the received character
+ * @note       Called by the CLI thread to wait for user input
  *****************************************************************************/
 static void FreeRTOS_read(char *character)
 {
-    // ToDo: Complete this function
-    vTaskSuspend(NULL); // We suspend ourselves. Please remove this when doing your code
+    // Block until a character is received (signaled by semaphore)
+    if (xSemaphoreTake(xRxSemaphore, portMAX_DELAY) == pdTRUE) {
+        // Read character from the circular buffer
+        uint8_t rxChar;
+        if (SerialConsoleReadCharacter(&rxChar) != -1) {
+            *character = rxChar;
+        }
+    }
 }
 
 /******************************************************************************

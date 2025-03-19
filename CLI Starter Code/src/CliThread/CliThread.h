@@ -39,6 +39,7 @@ BaseType_t xCliClearTerminalScreen( char *pcWriteBuffer,size_t xWriteBufferLen,c
 #define CLI_PARAMS_CLEAR_SCREEN			0
 
 
+extern SemaphoreHandle_t xRxSemaphore;
 void vCommandConsoleTask( void *pvParameters );
 
 BaseType_t CLI_GetImuData( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );

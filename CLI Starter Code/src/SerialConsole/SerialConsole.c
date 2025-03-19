@@ -27,6 +27,7 @@
  * Includes
  ******************************************************************************/
 #include "SerialConsole.h"
+#include "CliThread.h"
 
 /******************************************************************************
  * Defines
@@ -153,6 +154,57 @@ void LogMessage(enum eDebugLogLevels level, const char *format, ...)
 {
     // Todo: Implement Debug Logger
 	// More detailed descriptions are in header file
+	if (level >= currentDebugLevel && level < N_DEBUG_LEVELS)
+	{
+		// Buffer to hold the formatted message
+		char formattedMessage[TX_BUFFER_SIZE];
+		
+		// Prefix buffer to hold the log level indicator
+		char prefix[15];
+		
+		// Format the prefix based on log level
+		switch (level)
+		{
+			case LOG_INFO_LVL:
+			strcpy(prefix, "[INFO] ");
+			break;
+			case LOG_DEBUG_LVL:
+			strcpy(prefix, "[DEBUG] ");
+			break;
+			case LOG_WARNING_LVL:
+			strcpy(prefix, "[WARNING] ");
+			break;
+			case LOG_ERROR_LVL:
+			strcpy(prefix, "[ERROR] ");
+			break;
+			case LOG_FATAL_LVL:
+			strcpy(prefix, "[FATAL] ");
+			break;
+			default:
+			strcpy(prefix, "");
+			break;
+		}
+		
+		// Variable argument list
+		va_list args;
+		
+		// Initialize variable argument list
+		va_start(args, format);
+		
+		// Format the message text using vsprintf
+		vsprintf(formattedMessage, format, args);
+		
+		// Clean up the variable argument list
+		va_end(args);
+		
+		// Create the final message with prefix
+		char finalMessage[TX_BUFFER_SIZE];
+		strcpy(finalMessage, prefix);
+		strcat(finalMessage, formattedMessage);
+		
+		// Send the formatted message to the serial console
+		SerialConsoleWriteString(finalMessage);
+	}
 }
 
 /*
@@ -213,14 +265,32 @@ static void configure_usart_callbacks(void)
 
 /**************************************************************************/ 
 /**
- * @fn			void usart_read_callback(struct usart_module *const usart_module)
- * @brief		Callback called when the system finishes receives all the bytes requested from a UART read job
-		 Students to fill out. Please note that the code here is dummy code. It is only used to show you how some functions work.
- * @note
+ * @fn         void usart_read_callback(struct usart_module *const usart_module)
+ * @brief      Callback triggered when a character is received via UART
+ * @details    Stores the received character in the circular buffer and signals
+ *             the CLI thread that data is available for processing.
+ * @param[in]  usart_module Pointer to the USART module that triggered the callback
+ * @note       Called automatically by the UART driver when a character is received
  *****************************************************************************/
 void usart_read_callback(struct usart_module *const usart_module)
 {
-	// ToDo: Complete this function 
+    // Store the received character in the circular buffer
+    circular_buf_put(cbufRx, latestRx);
+    
+    // Start another read job for the next character
+    usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1);
+    
+    // Signal to the CLI thread that a character is available
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    
+    // Use FromISR version since this is called from an interrupt
+    extern SemaphoreHandle_t xRxSemaphore;
+    if (xRxSemaphore != NULL) {
+        xSemaphoreGiveFromISR(xRxSemaphore, &xHigherPriorityTaskWoken);
+        
+        // If a higher priority task was woken, request a context switch
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
 }
 
 /**************************************************************************/ 
