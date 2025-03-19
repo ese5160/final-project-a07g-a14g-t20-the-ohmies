@@ -35,6 +35,23 @@ static const CLI_Command_Definition_t xResetCommand =
         "reset: Resets the device\r\n",
         (const pdCOMMAND_LINE_CALLBACK)CLI_ResetDevice,
         0};
+		
+
+static const CLI_Command_Definition_t xVersionCommand =
+{
+	CLI_COMMAND_VERSION,
+	CLI_HELP_VERSION,
+	CLI_CALLBACK_VERSION,
+	CLI_PARAMS_VERSION
+};
+
+static const CLI_Command_Definition_t xTicksCommand =
+{
+	CLI_COMMAND_TICKS,
+	CLI_HELP_TICKS,
+	CLI_CALLBACK_TICKS,
+	CLI_PARAMS_TICKS
+};
 
 /******************************************************************************
  * Forward Declarations
@@ -56,6 +73,9 @@ void vCommandConsoleTask(void *pvParameters)
 
     FreeRTOS_CLIRegisterCommand(&xClearScreen);
     FreeRTOS_CLIRegisterCommand(&xResetCommand);
+	
+	FreeRTOS_CLIRegisterCommand(&xVersionCommand);
+	FreeRTOS_CLIRegisterCommand(&xTicksCommand);
 
     uint8_t cRxedChar[2], cInputIndex = 0;
     BaseType_t xMoreDataToFollow;
@@ -253,5 +273,54 @@ BaseType_t xCliClearTerminalScreen(char *pcWriteBuffer, size_t xWriteBufferLen, 
 BaseType_t CLI_ResetDevice(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
 {
     system_reset();
+    return pdFALSE;
+}
+
+/**************************************************************************/
+/**
+ * @fn         BaseType_t CLI_PrintVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+ * @brief      CLI command to print the firmware version
+ * @details    Outputs the firmware version defined by FIRMWARE_VERSION
+ * @param[out] pcWriteBuffer Buffer to write the output to
+ * @param[in]  xWriteBufferLen Maximum length of the output buffer
+ * @param[in]  pcCommandString Command string input by the user
+ * @return     pdFALSE indicating that the command has been fully processed
+ * @note       Called when the user types "version" in the CLI
+ *****************************************************************************/
+BaseType_t CLI_PrintVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    // Prevent compiler warnings
+    (void)pcCommandString;
+    
+    // Write the version string to the output buffer
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Firmware Version: %s\r\n", FIRMWARE_VERSION);
+    
+    // Return pdFALSE to indicate the command has been fully processed
+    return pdFALSE;
+}
+
+/**************************************************************************/
+/**
+ * @fn         BaseType_t CLI_PrintTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+ * @brief      CLI command to print the number of ticks since scheduler start
+ * @details    Uses xTaskGetTickCount() to get the current tick count
+ * @param[out] pcWriteBuffer Buffer to write the output to
+ * @param[in]  xWriteBufferLen Maximum length of the output buffer
+ * @param[in]  pcCommandString Command string input by the user
+ * @return     pdFALSE indicating that the command has been fully processed
+ * @note       Called when the user types "ticks" in the CLI
+ *****************************************************************************/
+BaseType_t CLI_PrintTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    // Prevent compiler warnings
+    (void)pcCommandString;
+    
+    // Get the current tick count
+    TickType_t currentTicks = xTaskGetTickCount();
+    
+    // Write the tick count to the output buffer
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Tick count: %lu\r\n", (unsigned long)currentTicks);
+    
+    // Return pdFALSE to indicate the command has been fully processed
     return pdFALSE;
 }

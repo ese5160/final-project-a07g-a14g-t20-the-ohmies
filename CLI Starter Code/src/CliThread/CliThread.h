@@ -39,6 +39,21 @@ BaseType_t xCliClearTerminalScreen( char *pcWriteBuffer,size_t xWriteBufferLen,c
 #define CLI_PARAMS_CLEAR_SCREEN			0
 
 
+// Add near the top of CliThread.h after other #defines
+#define FIRMWARE_VERSION "0.0.1"
+
+// Add command definitions for the version command
+#define CLI_COMMAND_VERSION          "version"
+#define CLI_HELP_VERSION             "version: Prints the firmware version\r\n"
+#define CLI_CALLBACK_VERSION         (pdCOMMAND_LINE_CALLBACK)CLI_PrintVersion
+#define CLI_PARAMS_VERSION           0
+
+// Add command definitions for the ticks command
+#define CLI_COMMAND_TICKS            "ticks"
+#define CLI_HELP_TICKS               "ticks: Prints the number of ticks since scheduler start\r\n"
+#define CLI_CALLBACK_TICKS           (pdCOMMAND_LINE_CALLBACK)CLI_PrintTicks
+#define CLI_PARAMS_TICKS             0
+
 extern SemaphoreHandle_t xRxSemaphore;
 void vCommandConsoleTask( void *pvParameters );
 
@@ -49,3 +64,6 @@ BaseType_t CLI_NeotrellProcessButtonBuffer( int8_t *pcWriteBuffer,size_t xWriteB
 BaseType_t CLI_DistanceSensorGetDistance( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
 BaseType_t CLI_ResetDevice( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
 BaseType_t CLI_SendDummyGameData( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
+BaseType_t CLI_PrintVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString);
+BaseType_t CLI_PrintTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString);
+
