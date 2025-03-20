@@ -4,7 +4,7 @@
 * Team Name: The Ohmies
 * Team Members: Megha Mistry & Kevin Wang
 * GitHub Repository URL: https://github.com/ese5160/final-project-a07g-a14g-t20-the-ohmies.git
-* Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
+* Description of test hardware: Laptop, Logic Analyzer, SAMW25 dev board, connecting wires
 
 ## 1. Software Architecture
 
@@ -31,3 +31,19 @@
 ## 3. Debug Logger Module
 
 ## 4. Wiretap the convo
+    
+    1.
+        i. Attach the logic analyzer to PB10 (TX line, SERCOM4 PAD2), PB11 (RX line, SERCOM4 PAD3), and a GND connection for reference.
+
+        ii. Attach to the expansion header pins that expose PB10 and PB11, or if available, dedicated UART test points on the SAMW25 Xplained board.
+
+        iii. Configure the Async Serial analyzer for 115200 baud rate, 8 data bits, no parity, 1 stop bit, LSB first bit order and non-signal signal for Channel 0. Set the Saleae Logic 8 to sample at 10 MHz for digital. 
+
+    2. Hardware connections between the SAMW25 Xplained dev board and the logic analyzer:
+![HW_connections](Images/Part3_hardware.jpg)
+
+    3. Decoded Message:
+![Logic_Data](Images/Part3_ss.png)
+
+    4. Wiretapped convo capture file is saved in Images folder as "Part3_capture".
+
