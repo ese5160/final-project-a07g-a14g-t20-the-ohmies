@@ -24,7 +24,9 @@
 
     7.
 
+
     8.
+
 
     9.  In "main.c", the "StartTasks()" function prints the amount of free heap memory before task creation, then creates the CLI task using "xTaskCreate()" (which starts the "vCommandConsoleTask" thread), and finally prints the free heap memory after the CLI task is started. Only one application-specific thread (the CLI thread) is started by "StartTasks()", aside from the inherent system tasks scheduled by FreeRTOS (such as the idle and timer tasks).
 
