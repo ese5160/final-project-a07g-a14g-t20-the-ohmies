@@ -22,11 +22,11 @@
 
     6. In "usart_read_callback()", the function is intended to handle the new character coming from the SERCOM interface; the character (held in "latestRx") should be placed into the receive circular buffer ("cbufRx"), and a new read job is initiated to continue capturing characters. In "usart_write_callback()", the callback checks whether there are additional characters waiting in the transmit circular buffer ("cbufTx"), and if so, it retrieves the next character and starts a transmission job (via "usart_write_buffer_job()"); this ensures a continuous flow of data being sent from the circular buffer to the UART hardware.
 
-    7.
+    7. The flowchart below shows the process of a user typing a character and that character ending up in the circular buffer 'cbufRx':
+![USART_Rx](Images/Part2_Q7.jpg)
 
-
-    8.
-
+    8. The flowchart below shows a string being added in to the circular buffer 'cbufTx' by the program and ending up being shown on the PC screen:
+![USART_Tx](Images/Part2_Q8.jpg)
 
     9.  In "main.c", the "StartTasks()" function prints the amount of free heap memory before task creation, then creates the CLI task using "xTaskCreate()" (which starts the "vCommandConsoleTask" thread), and finally prints the free heap memory after the CLI task is started. Only one application-specific thread (the CLI thread) is started by "StartTasks()", aside from the inherent system tasks scheduled by FreeRTOS (such as the idle and timer tasks).
 
