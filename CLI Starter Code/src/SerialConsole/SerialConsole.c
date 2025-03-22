@@ -64,6 +64,9 @@ char rxCharacterBuffer[RX_BUFFER_SIZE]; 			   ///< Buffer to store received char
 char txCharacterBuffer[TX_BUFFER_SIZE]; 			   ///< Buffer to store characters to be sent
 enum eDebugLogLevels currentDebugLevel = LOG_INFO_LVL; ///< Default debug level
 
+SemaphoreHandle_t rxSemaphore = NULL; // Semaphore to signal character reception
+
+
 /******************************************************************************
  * Global Functions
  ******************************************************************************/
@@ -76,6 +79,7 @@ void InitializeSerialConsole(void)
     // Initialize circular buffers for RX and TX
 	cbufRx = circular_buf_init((uint8_t *)rxCharacterBuffer, RX_BUFFER_SIZE);
     cbufTx = circular_buf_init((uint8_t *)txCharacterBuffer, TX_BUFFER_SIZE);
+	rxSemaphore = xSemaphoreCreateBinary();
 
     // Configure USART and Callbacks
 	configure_usart();
@@ -253,23 +257,18 @@ static void configure_usart_callbacks(void)
  *****************************************************************************/
 void usart_read_callback(struct usart_module *const usart_module)
 {
-    // Store the received character in the circular buffer
-    circular_buf_put(cbufRx, latestRx);
-    
-    // Start another read job for the next character
-    usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1);
-    
-    // Signal to the CLI thread that a character is available
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    
-    // Use FromISR version since this is called from an interrupt
-    extern SemaphoreHandle_t xRxSemaphore;
-    if (xRxSemaphore != NULL) {
-        xSemaphoreGiveFromISR(xRxSemaphore, &xHigherPriorityTaskWoken);
-        
-        // If a higher priority task was woken, request a context switch
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    }
+	// Store the received character in the circular buffer
+	circular_buf_put(cbufRx, latestRx);
+	
+	// Notify the CLI thread that a character is available
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	xSemaphoreGiveFromISR(rxSemaphore, &xHigherPriorityTaskWoken);
+	
+	// Start the next character read
+	usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1);
+	
+	// If a higher priority task was woken, request a context switch
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /**************************************************************************/ 

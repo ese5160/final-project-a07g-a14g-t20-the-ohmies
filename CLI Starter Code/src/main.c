@@ -144,3 +144,4 @@ void vApplicationStackOverflowHook(void)
 	while (1)
 		;
 }
+

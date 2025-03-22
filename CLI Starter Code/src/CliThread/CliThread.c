@@ -37,20 +37,21 @@ static const CLI_Command_Definition_t xResetCommand =
         0};
 		
 
+// Add with other command definitions:
 static const CLI_Command_Definition_t xVersionCommand =
 {
 	CLI_COMMAND_VERSION,
 	CLI_HELP_VERSION,
-	CLI_CALLBACK_VERSION,
-	CLI_PARAMS_VERSION
+	(const pdCOMMAND_LINE_CALLBACK)CLI_GetVersion,
+	0
 };
 
 static const CLI_Command_Definition_t xTicksCommand =
 {
 	CLI_COMMAND_TICKS,
 	CLI_HELP_TICKS,
-	CLI_CALLBACK_TICKS,
-	CLI_PARAMS_TICKS
+	(const pdCOMMAND_LINE_CALLBACK)CLI_GetTicks,
+	0
 };
 
 /******************************************************************************
@@ -66,10 +67,11 @@ static void FreeRTOS_read(char *character);
  ******************************************************************************/
 
 
-SemaphoreHandle_t xRxSemaphore = NULL;
+
 void vCommandConsoleTask(void *pvParameters)
 {
     // REGISTER COMMANDS HERE
+
 
     FreeRTOS_CLIRegisterCommand(&xClearScreen);
     FreeRTOS_CLIRegisterCommand(&xResetCommand);
@@ -86,12 +88,7 @@ void vCommandConsoleTask(void *pvParameters)
     static char pcEscapeCodes[4];
     static uint8_t pcEscapeCodePos = 0;
 
-    // Create semaphore for character reception synchronization
-    xRxSemaphore = xSemaphoreCreateBinary();
-    if (xRxSemaphore == NULL) {
-        SerialConsoleWriteString("Failed to create semaphore\r\n");
-        vTaskDelete(NULL);
-    }
+    // Any semaphores/mutexes/etc you needed to be initialized, you can do them here
 
     /* This code assumes the peripheral being used as the console has already
     been opened and configured, and is passed into the task as the task
@@ -108,10 +105,12 @@ void vCommandConsoleTask(void *pvParameters)
         FreeRTOS_read(&cRxedChar);
 
         if (cRxedChar[0] == '\n' || cRxedChar[0] == '\r')
+		//if (cRxedChar[0] == '.' )
         {
             /* A newline character was received, so the input command string is
             complete and can be processed.  Transmit a line separator, just to
             make the output easier to read. */
+			   
             SerialConsoleWriteString("\r\n");
             // Copy for last command
             isEscapeCode = false;
@@ -243,15 +242,23 @@ void vCommandConsoleTask(void *pvParameters)
  *****************************************************************************/
 static void FreeRTOS_read(char *character)
 {
-    // Block until a character is received (signaled by semaphore)
-    if (xSemaphoreTake(xRxSemaphore, portMAX_DELAY) == pdTRUE) {
-        // Read character from the circular buffer
-        uint8_t rxChar;
-        if (SerialConsoleReadCharacter(&rxChar) != -1) {
-            *character = rxChar;
-        }
-    }
+	// Wait for a character to be available
+	xSemaphoreTake(rxSemaphore, portMAX_DELAY);
+	
+	// Read the character from the circular buffer
+	uint8_t rxChar;
+	int result = SerialConsoleReadCharacter(&rxChar);
+	
+	if (result != -1) {
+		*character = rxChar;
+	
+
+		} else {
+		// If the buffer was empty, try again
+		FreeRTOS_read(character);
+	}
 }
+
 
 /******************************************************************************
  * CLI Functions - Define here
@@ -276,51 +283,33 @@ BaseType_t CLI_ResetDevice(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
     return pdFALSE;
 }
 
-/**************************************************************************/
-/**
- * @fn         BaseType_t CLI_PrintVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
- * @brief      CLI command to print the firmware version
- * @details    Outputs the firmware version defined by FIRMWARE_VERSION
- * @param[out] pcWriteBuffer Buffer to write the output to
- * @param[in]  xWriteBufferLen Maximum length of the output buffer
- * @param[in]  pcCommandString Command string input by the user
- * @return     pdFALSE indicating that the command has been fully processed
- * @note       Called when the user types "version" in the CLI
- *****************************************************************************/
-BaseType_t CLI_PrintVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+
+
+/******************************************************************************
+ * @fn         BaseType_t CLI_GetVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+ * @brief      Prints the current firmware version
+ * @param[out] pcWriteBuffer  Buffer where the output is written to
+ * @param[in]  xWriteBufferLen  Length of the write buffer
+ * @param[in]  pcCommandString  The command string (not used in this function)
+ * @return     pdFALSE to indicate the end of the command output
+ ******************************************************************************/
+BaseType_t CLI_GetVersion(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
 {
-    // Prevent compiler warnings
-    (void)pcCommandString;
-    
-    // Write the version string to the output buffer
-    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Firmware Version: %s\r\n", FIRMWARE_VERSION);
-    
-    // Return pdFALSE to indicate the command has been fully processed
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Firmware Version: %s\r\n", 
+             FIRMWARE_VERSION);
     return pdFALSE;
 }
 
-/**************************************************************************/
-/**
- * @fn         BaseType_t CLI_PrintTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
- * @brief      CLI command to print the number of ticks since scheduler start
- * @details    Uses xTaskGetTickCount() to get the current tick count
- * @param[out] pcWriteBuffer Buffer to write the output to
- * @param[in]  xWriteBufferLen Maximum length of the output buffer
- * @param[in]  pcCommandString Command string input by the user
- * @return     pdFALSE indicating that the command has been fully processed
- * @note       Called when the user types "ticks" in the CLI
- *****************************************************************************/
-BaseType_t CLI_PrintTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+/******************************************************************************
+ * @fn         BaseType_t CLI_GetTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+ * @brief      Prints the number of ticks since the scheduler was started
+ * @param[out] pcWriteBuffer  Buffer where the output is written to
+ * @param[in]  xWriteBufferLen  Length of the write buffer
+ * @param[in]  pcCommandString  The command string (not used in this function)
+ * @return     pdFALSE to indicate the end of the command output
+ ******************************************************************************/
+BaseType_t CLI_GetTicks(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
 {
-    // Prevent compiler warnings
-    (void)pcCommandString;
-    
-    // Get the current tick count
-    TickType_t currentTicks = xTaskGetTickCount();
-    
-    // Write the tick count to the output buffer
-    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Tick count: %lu\r\n", (unsigned long)currentTicks);
-    
-    // Return pdFALSE to indicate the command has been fully processed
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Ticks since start: %lu\r\n", xTaskGetTickCount());
     return pdFALSE;
 }
