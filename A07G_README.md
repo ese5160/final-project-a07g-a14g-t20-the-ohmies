@@ -16,8 +16,7 @@
 
 ### Flow Chart
 
-![flowchart](Images/flowchart.png)
-
+![Flowchart](Images/flowchart.png)
 
 ## 2. Understanding the Starter code
 
@@ -43,6 +42,8 @@
 
 ## 3. Debug Logger Module
 
+    Code completed and uploaded to repo.
+
 ## 4. Wiretap the convo
     
     1.
@@ -66,8 +67,10 @@
 
 ## 6 Add CLI commands
 
-The video link is shared below.
+    1. Code completed and uploaded to repo.
+    
+    2. The video link is shared below.
 
-    https://drive.google.com/file/d/1MNQdkWNeYTWTmTnWWb3vkdDvMrFz83Jr/view?usp=sharing
+https://drive.google.com/file/d/1MNQdkWNeYTWTmTnWWb3vkdDvMrFz83Jr/view?usp=sharing
 
 
