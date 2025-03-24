@@ -8,6 +8,17 @@
 
 ## 1. Software Architecture
 
+
+### Block Diagram
+
+![BlockDiagram](Images/block_diagram.png)
+
+
+### Flow Chart
+
+![flowchart](Images/flowchart.png)
+
+
 ## 2. Understanding the Starter code
 
     1. "InitializeSerialConsole()" configures and enables UART communication, sets up circular buffers, and registers callbacks for asynchronous reads/writes. "cbufRx" and "cbufTx" are handle pointers to circular buffer structures (type "cbuf_handle_t"), which are used to manage incoming and outgoing character data in a first-in-first-out manner.
@@ -48,4 +59,15 @@
 ![Logic_Data](Images/Part3_ss.png)
 
     4. Wiretapped convo capture file is saved in Images folder as "Part3_capture".
+
+## 5 Complete CLI
+
+    Code completed and uploaded to repo.
+
+## 6 Add CLI commands
+
+The video link is shared below.
+
+    https://drive.google.com/file/d/1MNQdkWNeYTWTmTnWWb3vkdDvMrFz83Jr/view?usp=sharing
+
 
