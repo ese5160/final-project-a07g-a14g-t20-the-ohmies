@@ -45,7 +45,6 @@
 
 ![flowchart](Images/flowchart.png)
 
-
 ## 2. Understanding the Starter code
 
     1. "InitializeSerialConsole()" configures and enables UART communication, sets up circular buffers, and registers callbacks for asynchronous reads/writes. "cbufRx" and "cbufTx" are handle pointers to circular buffer structures (type "cbuf_handle_t"), which are used to manage incoming and outgoing character data in a first-in-first-out manner.
