@@ -15,7 +15,7 @@
         - HRS-04: System shall use four micro servo motors (MG90S), one on each of the index finger, middle finger, ring finger, and pinky for finger actuation.
         - HRS-05: System shall operate on a 3.7V Li-ion battery.
         - HRS-06: System shall include voltage regulation to 3.3V for MCU and sensors.
-        - HRS-07: System shall use LM2585T-5.0 boost converter to provide 5V voltage for servo motors.
+        - HRS-07: System shall use 5.0V boost converter to provide 5V voltage for servo motors.
         - HRS-08: System shall provide the user a minimum grip strength of 20 lbs.
         - HRS-09: System shall support individual control of 4 servo motors for independent finger actuation.
         - HRS-10: System shall include an emergency stop button to allow users to immediately disable all motor operations in case of failure.
