@@ -8,13 +8,40 @@
 
 ## 1. Software Architecture
 
+    1. Updated HRS:
+        - HRS-01: System shall use SAMW25 as the main microcontroller.
+        - HRS-02: System shall use MyoWare EMG sensor with analog output.
+        - HRS-03: System shall incorporate LSM6DSOX IMU sensors communicating via I2C.
+        - HRS-04: System shall use four micro servo motors (MG90S), one on each of the index finger, middle finger, ring finger, and pinky for finger actuation.
+        - HRS-05: System shall operate on a 3.7V Li-ion battery.
+        - HRS-06: System shall include voltage regulation to 3.3V for MCU and sensors.
+        - HRS-07: System shall use LM2585T-5.0 boost converter to provide 5V voltage for servo motors.
+        - HRS-08: System shall provide the user a minimum grip strength of 20 lbs.
+        - HRS-09: System shall support individual control of 4 servo motors for independent finger actuation.
+        - HRS-10: System shall include an emergency stop button to allow users to immediately disable all motor operations in case of failure.
 
-### Block Diagram
+        Updated SRS:
+        - SRS-01: System shall use FreeRTOS for task scheduling and management.
+        - SRS-02: EMG sampling task shall run at the highest priority with a 1000Hz sampling rate.
+        - SRS-03: IMU data collection task shall run at 100Hz with medium priority.
+        - SRS-04: Motor control task shall process EMG data and update servo positions at 50Hz.
+        - SRS-05: Wi-Fi communication task shall transmit sensor data every 1 second at the lowest priority.
+        - SRS-06: System shall implement interrupt-driven safety monitoring for motor control.
+        - SRS-07: Task synchronization shall use FreeRTOS semaphores and mutexes to prevent data corruption.
+        - SRS-08: System shall allow the user to modify motor parameters (e.g., finger position, speed, and torque limits) through Wi-Fi commands.
+        - SRS-09: System shall implement an emergency stop function that disables all motor operations when the emergency button is pressed.
+        - SRS-10: System shall process Wi-Fi commands within 100ms of receipt.
+        - SRS-11: System shall support individual finger angle control from 0° to 90° with 1° resolution.
+        - SRS-12: System shall implement a command protocol for:
+            1. Emergency stop activation
+            2.User-defined motor parameter adjustments
+
+        2. Block Diagram
 
 ![BlockDiagram](Images/block_diagram.png)
 
 
-### Flow Chart
+    3. Flow Chart
 
 ![Flowchart](Images/flowchart.png)
 
@@ -72,5 +99,3 @@
     2. The video link is shared below.
 
 https://drive.google.com/file/d/1MNQdkWNeYTWTmTnWWb3vkdDvMrFz83Jr/view?usp=sharing
-
-
