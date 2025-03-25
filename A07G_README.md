@@ -41,9 +41,10 @@
 ![BlockDiagram](Images/block_diagram.png)
 
 
-    3. Flow Chart
+    3. Software Flow Chart
 
-![Flowchart](Images/flowchart.png)
+![flowchart](Images/flowchart.png)
+
 
 ## 2. Understanding the Starter code
 
